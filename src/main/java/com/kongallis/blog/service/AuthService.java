@@ -4,6 +4,7 @@ import com.kongallis.blog.dto.LoginRequest;
 import com.kongallis.blog.dto.RegisterRequest;
 import com.kongallis.blog.models.User;
 import com.kongallis.blog.repositories.UserRepository;
+import com.kongallis.blog.security.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,9 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private AuthenticationManager authenticationManagerBean;
+    @Autowired
+    private JwtProvider jwtProvider;
 
     public void signup(RegisterRequest registerRequest) {
         User user = new User();
@@ -38,11 +41,11 @@ public class AuthService {
     }
 
     // Ensures the authentication of the user
-    public void login(LoginRequest loginRequest) {
-        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+    public String login(LoginRequest loginRequest) {
+        Authentication authenticate = authenticationManagerBean.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                 loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
-       
+        return jwtProvider.generateToken(authenticate);
 
     }
 }
